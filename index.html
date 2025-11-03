@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NEET PG AI</title>
+    <style>
+        body { font-family: Arial; background: #667eea; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 10px; width: 400px; }
+        h1 { color: #2563eb; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        button { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1e40af; }
+        .chat { display: none; }
+        .msg { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .user { background: #2563eb; color: white; text-align: right; }
+        .ai { background: #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div id="setup">
+            <h1>🧠 NEET PG AI</h1>
+            <input type="text" id="name" placeholder="Your name">
+            <input type="email" id="email" placeholder="Email">
+            <select id="exam">
+                <option>Select exam</option>
+                <option>NEET PG</option>
+                <option>INICET</option>
+            </select>
+            <button onclick="start()">Start</button>
+        </div>
+        
+        <div class="chat" id="chat">
+            <h2>Chat</h2>
+            <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px;"></div>
+            <input type="text" id="input" placeholder="Type message...">
+            <button onclick="send()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let userId = null;
+
+        async function start() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const exam = document.getElementById('exam').value;
+            
+            if (!name || !email || exam === 'Select exam') {
+                alert('Fill all fields');
+                return;
+            }
+            
+            userId = Math.random().toString(36).substr(2, 9);
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('chat').style.display = 'block';
+            addMessage('ai', `Hello ${name}! Welcome to your NEET PG accountability journey. How many hours did you study today?`);
+        }
+
+        async function send() {
+            const msg = document.getElementById('input').value;
+            if (!msg) return;
+            
+            addMessage('user', msg);
+            document.getElementById('input').value = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                
+                const data = await response.json();
+                addMessage('ai', data.response);
+            } catch (e) {
+                addMessage('ai', 'Error: ' + e.message);
+            }
+        }
+
+        function addMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + sender;
+            div.textContent = text;
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+    </script>
+</body>
+</html>
